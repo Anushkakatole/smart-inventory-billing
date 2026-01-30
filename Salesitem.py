@@ -1,4 +1,5 @@
 from Database import get_conn
+
 class Salesitem:
 
     @staticmethod

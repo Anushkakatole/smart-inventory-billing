@@ -1,10 +1,7 @@
+import streamlit as st
 from Database import get_conn
 
-
 class Customers:
-    def __init__(self):
-        pass
-
     @staticmethod
     def create_table():
         conn = get_conn()
@@ -20,7 +17,7 @@ class Customers:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            print(e)
+            st.error(f"Error creating table: {e}")
         finally:
             cur.close()
             conn.close()
@@ -37,7 +34,7 @@ class Customers:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            print(e)
+            st.error(f"Error inserting customer: {e}")
         finally:
             cur.close()
             conn.close()
@@ -50,24 +47,18 @@ class Customers:
             cur.execute("SELECT * FROM customers WHERE id = %s", (customer_id,))
             customer = cur.fetchone()
             if not customer:
-                print("CUSTOMER NOT FOUND")
+                st.warning("Customer not found")
                 return
 
             if name:
-                cur.execute(
-                    "UPDATE customers SET name = %s WHERE id = %s",
-                    (name, customer_id)
-                )
+                cur.execute("UPDATE customers SET name = %s WHERE id = %s", (name, customer_id))
             if contact:
-                cur.execute(
-                    "UPDATE customers SET contact = %s WHERE id = %s",
-                    (contact, customer_id)
-                )
+                cur.execute("UPDATE customers SET contact = %s WHERE id = %s", (contact, customer_id))
 
             conn.commit()
         except Exception as e:
             conn.rollback()
-            print(e)
+            st.error(f"Error updating customer: {e}")
         finally:
             cur.close()
             conn.close()
@@ -81,7 +72,7 @@ class Customers:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            print(e)
+            st.error(f"Error deleting customer: {e}")
         finally:
             cur.close()
             conn.close()
@@ -92,56 +83,65 @@ class Customers:
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM customers")
-            customers = cur.fetchall()
-            return customers
+            return cur.fetchall()
         except Exception as e:
-            print(e)
+            st.error(f"Error fetching customers: {e}")
             return []
         finally:
             cur.close()
             conn.close()
 
-    @staticmethod
-    def customer_menu():
-        while True:
-            print("1. Create Table")
-            print("2. Insert Customer")
-            print("3. Update Customer")
-            print("4. Delete Customer")
-            print("5. View All Customers")
-            print("0. Exit")
+# ---------------- Streamlit Interface ---------------- #
 
-            choice = input("Enter your choice: ")
+st.title("Customer Management System")
 
-            if choice == "1":
-                Customers.create_table()
-                print("Customer table created successfully.")
+menu = st.sidebar.selectbox("Menu", ["Create Table", "Insert Customer", "Update Customer", "Delete Customer", "View All Customers"])
 
-            elif choice == "2":
-                name = input("Enter customer name: ")
-                contact = input("Enter customer contact: ")
-                Customers.insert_customer(name, contact)
-                print("Customer inserted successfully.")
+# 1. Create Table
+if menu == "Create Table":
+    if st.button("Create Customer Table"):
+        Customers.create_table()
+        st.success("Customer table created successfully!")
 
-            elif choice == "3":
-                customer_id = int(input("Enter customer ID to update: "))
-                name = input("Enter new name: ")
-                contact = input("Enter new contact: ")
-                Customers.update_customer(customer_id, name, contact)
-                print("Customer updated successfully.")
+# 2. Insert Customer
+elif menu == "Insert Customer":
+    st.subheader("Insert Customer")
+    name = st.text_input("Customer Name")
+    contact = st.text_input("Customer Contact")
+    if st.button("Insert"):
+        if name and contact:
+            Customers.insert_customer(name, contact)
+            st.success("Customer inserted successfully!")
+        else:
+            st.warning("Please enter both name and contact")
 
-            elif choice == "4":
-                customer_id = int(input("Enter customer ID to delete: "))
-                Customers.delete_customer(customer_id)
-                print("Customer deleted successfully.")
+# 3. Update Customer
+elif menu == "Update Customer":
+    st.subheader("Update Customer")
+    customer_id = st.number_input("Customer ID to Update", min_value=1, step=1)
+    new_name = st.text_input("New Name")
+    new_contact = st.text_input("New Contact")
+    if st.button("Update"):
+        if new_name or new_contact:
+            Customers.update_customer(customer_id, new_name if new_name else None, new_contact if new_contact else None)
+            st.success("Customer updated successfully!")
+        else:
+            st.warning("Enter at least a new name or contact to update")
 
-            elif choice == "5":
-                customers = Customers.get_all_customers()
-                print(customers)
+# 4. Delete Customer
+elif menu == "Delete Customer":
+    st.subheader("Delete Customer")
+    customer_id = st.number_input("Customer ID to Delete", min_value=1, step=1)
+    if st.button("Delete"):
+        Customers.delete_customer(customer_id)
+        st.success("Customer deleted successfully!")
 
-            elif choice == "0":
-                print("Exiting ....")
-                break
-
-            else:
-                print("Invalid choice. Please try again.")
+# 5. View All Customers
+elif menu == "View All Customers":
+    st.subheader("All Customers")
+    if st.button("Show Customers"):
+        all_customers = Customers.get_all_customers()
+        if all_customers:
+            st.dataframe(all_customers, columns=["ID", "Name", "Contact"])
+        else:
+            st.info("No customers found.")

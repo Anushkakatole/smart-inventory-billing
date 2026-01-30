@@ -1,6 +1,5 @@
 from Database import get_conn
 
-
 class Products:
 
     @staticmethod
@@ -18,9 +17,10 @@ class Products:
                 )
             """)
             conn.commit()
+            print("Product table created successfully.")
         except Exception as e:
             conn.rollback()
-            print(e)
+            print("Error creating table:", e)
         finally:
             cur.close()
             conn.close()
@@ -35,9 +35,10 @@ class Products:
                 (name, description, price, quantity)
             )
             conn.commit()
+            print("Product inserted successfully.")
         except Exception as e:
             conn.rollback()
-            print(e)
+            print("Error inserting product:", e)
         finally:
             cur.close()
             conn.close()
@@ -70,14 +71,18 @@ class Products:
                 update_fields.append("quantity = %s")
                 values.append(quantity)
 
+            if not update_fields:
+                print("Nothing to update.")
+                return
+
             values.append(product_id)
             query = f"UPDATE products SET {', '.join(update_fields)} WHERE id = %s"
             cur.execute(query, values)
-
             conn.commit()
+            print("Product updated successfully.")
         except Exception as e:
             conn.rollback()
-            print(e)
+            print("Error updating product:", e)
         finally:
             cur.close()
             conn.close()
@@ -89,9 +94,10 @@ class Products:
         try:
             cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
             conn.commit()
+            print("Product deleted successfully.")
         except Exception as e:
             conn.rollback()
-            print(e)
+            print("Error deleting product:", e)
         finally:
             cur.close()
             conn.close()
@@ -102,10 +108,13 @@ class Products:
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
-            return cur.fetchone()
+            product = cur.fetchone()
+            if product:
+                print("Product:", product)
+            else:
+                print("Product not found.")
         except Exception as e:
-            print(e)
-            return None
+            print("Error fetching product:", e)
         finally:
             cur.close()
             conn.close()
@@ -116,10 +125,15 @@ class Products:
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM products")
-            return cur.fetchall()
+            products = cur.fetchall()
+            if products:
+                print("\nAll Products:")
+                for p in products:
+                    print(p)
+            else:
+                print("No products found.")
         except Exception as e:
-            print(e)
-            return []
+            print("Error fetching products:", e)
         finally:
             cur.close()
             conn.close()
@@ -139,7 +153,6 @@ class Products:
 
             if choice == "1":
                 Products.create_table()
-                print("Product table created successfully.")
 
             elif choice == "2":
                 name = input("Enter product name: ")
@@ -147,7 +160,6 @@ class Products:
                 price = float(input("Enter product price: "))
                 quantity = int(input("Enter product quantity: "))
                 Products.insert_product(name, description, price, quantity)
-                print("Product inserted successfully.")
 
             elif choice == "3":
                 product_id = int(input("Enter product ID to update: "))
@@ -158,27 +170,22 @@ class Products:
 
                 Products.update_products(
                     product_id,
-                    name if name else None,
-                    description if description else None,
-                    float(price) if price else None,
-                    int(quantity) if quantity else None
+                    name=name if name else None,
+                    description=description if description else None,
+                    price=float(price) if price else None,
+                    quantity=int(quantity) if quantity else None
                 )
-                print("Product updated successfully.")
 
             elif choice == "4":
                 product_id = int(input("Enter product ID to delete: "))
                 Products.delete_product(product_id)
-                print("Product deleted successfully.")
 
             elif choice == "5":
                 product_id = int(input("Enter product ID to view: "))
-                product = Products.view_product_id(product_id)
-                print(product)
+                Products.view_product_id(product_id)
 
             elif choice == "6":
-                products = Products.view_products()
-                for p in products:
-                    print(p)
+                Products.view_products()
 
             elif choice == "0":
                 print("Exiting ....")
