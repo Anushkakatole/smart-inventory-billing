@@ -1,18 +1,14 @@
+import streamlit as st
 import psycopg2
 
 def connection():
     conn = psycopg2.connect(
-        host = "localhost",
-        database = "ecommerce",
-        user = "postgres",
-        password = "10anu0107",
-        port= "5432",
+        host=st.secrets["database"]["host"],
+        database=st.secrets["database"]["database"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        port=st.secrets["database"]["port"]
     )
-
-    if conn:
-        print(">>>>>>>>> Connection stabilished <<<<<<<<<")
-    else:
-        print(">>>>>>>>> Connection failed <<<<<<<<<")
     return conn
 
 conn = connection()

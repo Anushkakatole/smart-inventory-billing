@@ -1,9 +1,3 @@
 streamlit
 psycopg2-binary
 
-[database]
-host = "localhost"
-database = "ecommerce"
-user = "postgres"
-password = "Anushka10"
-port = 5432
