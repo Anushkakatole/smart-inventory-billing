@@ -1,11 +1,11 @@
-from Database import connection
+from Database import get_conn
 
 
 class Sales:
 
     @staticmethod
     def create_table():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("""
@@ -26,7 +26,7 @@ class Sales:
 
     @staticmethod
     def insert_sale(customer_id, date, total_amount):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute(
@@ -43,7 +43,7 @@ class Sales:
 
     @staticmethod
     def update_sale(sale_id, customer_id=None, date=None, total_amount=None):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM sales WHERE id = %s", (sale_id,))
@@ -80,7 +80,7 @@ class Sales:
 
     @staticmethod
     def delete_sale(sale_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("DELETE FROM sales WHERE id = %s", (sale_id,))
@@ -94,7 +94,7 @@ class Sales:
 
     @staticmethod
     def view_sales():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM sales")
@@ -108,7 +108,7 @@ class Sales:
 
     @staticmethod
     def view_sale_by_id(sale_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM sales WHERE id = %s", (sale_id,))
@@ -122,7 +122,7 @@ class Sales:
 
     @staticmethod
     def generate_bill(sale_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT total_amount FROM sales WHERE id = %s", (sale_id,))
@@ -137,7 +137,7 @@ class Sales:
 
     @staticmethod
     def total_sale_by_date(start_date, end_date):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute(
@@ -155,7 +155,7 @@ class Sales:
 
     @staticmethod
     def get_sales_by_customer(customer_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM sales WHERE customer_id = %s", (customer_id,))

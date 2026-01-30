@@ -1,11 +1,11 @@
-from Database import connection
+from Database import get_conn
 
 
 class Products:
 
     @staticmethod
     def create_table():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("""
@@ -27,7 +27,7 @@ class Products:
 
     @staticmethod
     def insert_product(name, description, price, quantity):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute(
@@ -44,7 +44,7 @@ class Products:
 
     @staticmethod
     def update_products(product_id, name=None, description=None, price=None, quantity=None):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
@@ -84,7 +84,7 @@ class Products:
 
     @staticmethod
     def delete_product(product_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("DELETE FROM products WHERE id = %s", (product_id,))
@@ -98,7 +98,7 @@ class Products:
 
     @staticmethod
     def view_product_id(product_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
@@ -112,7 +112,7 @@ class Products:
 
     @staticmethod
     def view_products():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM products")

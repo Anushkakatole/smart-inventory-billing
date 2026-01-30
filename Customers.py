@@ -1,4 +1,4 @@
-from Database import connection
+from Database import get_conn
 
 
 class Customers:
@@ -7,7 +7,7 @@ class Customers:
 
     @staticmethod
     def create_table():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("""
@@ -27,7 +27,7 @@ class Customers:
 
     @staticmethod
     def insert_customer(name, contact):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute(
@@ -44,7 +44,7 @@ class Customers:
 
     @staticmethod
     def update_customer(customer_id, name=None, contact=None):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM customers WHERE id = %s", (customer_id,))
@@ -74,7 +74,7 @@ class Customers:
 
     @staticmethod
     def delete_customer(customer_id):
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("DELETE FROM customers WHERE id = %s", (customer_id,))
@@ -88,7 +88,7 @@ class Customers:
 
     @staticmethod
     def get_all_customers():
-        conn = connection()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("SELECT * FROM customers")

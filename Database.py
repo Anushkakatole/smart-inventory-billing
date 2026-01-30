@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 
 
-def connection():
+def get_conn():
     """
     Creates and returns a NEW PostgreSQL connection.
     Safe for Streamlit Cloud + Supabase.
