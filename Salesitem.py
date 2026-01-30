@@ -1,9 +1,9 @@
-from Database import cget_conn
+from Database import get_conn
 class Salesitem:
 
     @staticmethod
     def create_table():
-        conn = cget_conn()
+        conn = get_conn()
         cur = conn.cursor()
         try:
             cur.execute("""
