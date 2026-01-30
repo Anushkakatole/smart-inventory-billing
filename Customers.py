@@ -1,69 +1,106 @@
-from Database import conn
+from Database import connection
+
 
 class Customers:
     def __init__(self):
         pass
-        #self.name = name
-        #self.contact = contact
-        
+
     @staticmethod
     def create_table():
+        conn = connection()
         cur = conn.cursor()
-        cur.execute(
-            """CREATE TABLE IF NOT EXISTS customers(
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                contact VARCHAR(15) NOT NULL
+        try:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS customers(
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    contact VARCHAR(15) NOT NULL
                 )
-        """)
-        conn.commit()
-        cur.close()
-
-    @staticmethod
-    def insert_customer(name,contact):
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO  customers(name,contact) VALUES(%s,%s)",
-            (name,contact)
-        )
-        conn.commit()
-        cur.close()
-
-    @staticmethod
-    def update_customer(customer_id,name=None,contact=None):
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM customers WHERE id= %s", (customer_id,))
-        customer = cur.fetchone()
-        if not customer:
-            print("CUSTOMERS NOT FOUND")
+            """)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(e)
+        finally:
             cur.close()
-            return
-        update_fields = []
-        if name:
-            update_fields.append((f"name= '{name}'"))
-        if contact:
-            update_fields.append((f"contact= '{contact}'"))
-        update_query = f"UPDATE customers SET {', '.join(update_fields)} WHERE id= %s"
-        cur.execute(update_query, (customer_id,))
-        
-        conn.commit()
-        cur.close()
-        
+            conn.close()
+
+    @staticmethod
+    def insert_customer(name, contact):
+        conn = connection()
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                "INSERT INTO customers (name, contact) VALUES (%s, %s)",
+                (name, contact)
+            )
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(e)
+        finally:
+            cur.close()
+            conn.close()
+
+    @staticmethod
+    def update_customer(customer_id, name=None, contact=None):
+        conn = connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT * FROM customers WHERE id = %s", (customer_id,))
+            customer = cur.fetchone()
+            if not customer:
+                print("CUSTOMER NOT FOUND")
+                return
+
+            if name:
+                cur.execute(
+                    "UPDATE customers SET name = %s WHERE id = %s",
+                    (name, customer_id)
+                )
+            if contact:
+                cur.execute(
+                    "UPDATE customers SET contact = %s WHERE id = %s",
+                    (contact, customer_id)
+                )
+
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(e)
+        finally:
+            cur.close()
+            conn.close()
+
     @staticmethod
     def delete_customer(customer_id):
+        conn = connection()
         cur = conn.cursor()
-        cur.execute("DELETE FROM customers WHERE id= %s", (customer_id,))
-        conn.commit()
-        cur.close()
+        try:
+            cur.execute("DELETE FROM customers WHERE id = %s", (customer_id,))
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(e)
+        finally:
+            cur.close()
+            conn.close()
 
     @staticmethod
     def get_all_customers():
+        conn = connection()
         cur = conn.cursor()
-        cur.execute("SELECT * FROM customers")
-        customers = cur.fetchall()
-        cur.close()
-        return customers
-    
+        try:
+            cur.execute("SELECT * FROM customers")
+            customers = cur.fetchall()
+            return customers
+        except Exception as e:
+            print(e)
+            return []
+        finally:
+            cur.close()
+            conn.close()
+
     @staticmethod
     def customer_menu():
         while True:
@@ -73,32 +110,38 @@ class Customers:
             print("4. Delete Customer")
             print("5. View All Customers")
             print("0. Exit")
+
             choice = input("Enter your choice: ")
+
             if choice == "1":
                 Customers.create_table()
                 print("Customer table created successfully.")
+
             elif choice == "2":
                 name = input("Enter customer name: ")
                 contact = input("Enter customer contact: ")
-                Customers.insert_customer(name,contact)
+                Customers.insert_customer(name, contact)
                 print("Customer inserted successfully.")
+
             elif choice == "3":
                 customer_id = int(input("Enter customer ID to update: "))
-                name = input("Enter new name : ")
-                contact = input("Enter new contact : ")
-                Customers.update_customer(customer_id, name , contact )
+                name = input("Enter new name: ")
+                contact = input("Enter new contact: ")
+                Customers.update_customer(customer_id, name, contact)
                 print("Customer updated successfully.")
+
             elif choice == "4":
                 customer_id = int(input("Enter customer ID to delete: "))
                 Customers.delete_customer(customer_id)
                 print("Customer deleted successfully.")
+
             elif choice == "5":
                 customers = Customers.get_all_customers()
-                print("Customers fetched!")
+                print(customers)
+
             elif choice == "0":
                 print("Exiting ....")
                 break
+
             else:
                 print("Invalid choice. Please try again.")
-
-#Customers().customer_menu()

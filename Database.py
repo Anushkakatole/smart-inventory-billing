@@ -1,7 +1,12 @@
 import streamlit as st
 import psycopg2
 
+
 def connection():
+    """
+    Creates and returns a NEW PostgreSQL connection.
+    Safe for Streamlit Cloud + Supabase.
+    """
     return psycopg2.connect(
         host=st.secrets["database"]["host"],
         database=st.secrets["database"]["database"],
@@ -10,5 +15,3 @@ def connection():
         port=st.secrets["database"]["port"],
         sslmode="require"
     )
-
-conn = connection()
